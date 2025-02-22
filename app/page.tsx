@@ -8,7 +8,7 @@ import { Snowball } from "@/components/snowball"
 export default function Home() {
   return (
     <div className="w-full p-4 flex justify-center">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl flex flex-col items-center justify-center">
         <Authenticated>
           <Snowball />
         </Authenticated>

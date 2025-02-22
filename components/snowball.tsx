@@ -53,7 +53,7 @@ export function Snowball() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full fixed gap-4">
-      <div className="flex flex-col items-center justify-center gap-2">
+      <div className="flex flex-col w-full items-center justify-center gap-2">
         {conversation.status === "disconnected" ? (
           <Button
             onClick={startConversation}
