@@ -28,7 +28,7 @@ export default function RootLayout({
             <SidebarProvider>
               <div className="flex min-h-screen">
                 <LeftSidebar />
-                <main className="flex-1 flex justify-center">
+                <main className="flex-1 flex">
                   {children}
                 </main>
                 <RightSidebar />
