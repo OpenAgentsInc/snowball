@@ -9,3 +9,7 @@ I've used Convex and Clerk before. That plus standard NextJS/Vercel/Tailwind/Sha
 ### 9:10am
 
 Configured Convex & Clerk for dev and prod. Deployed to https://snowball.openagents.com and the boilerplate works well in prod.
+
+### 10:20am
+
+Added sidebar layout with demo cards in [PR #1](https://github.com/OpenAgentsInc/snowball/pull/1). You can see how I'm primarily using code-gen with OpenAgents [here](https://github.com/OpenAgentsInc/snowball/pull/1#issuecomment-2676275168), supplemented occasionally by Cursor agent.
