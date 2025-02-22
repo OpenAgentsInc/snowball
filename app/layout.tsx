@@ -2,7 +2,9 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import Script from "next/script"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import {
+    SidebarInset, SidebarProvider, SidebarTrigger
+} from "@/components/ui/sidebar"
 import { ClerkProvider } from "@clerk/nextjs"
 import { ConvexClientProvider } from "./ConvexClientProvider"
 
@@ -27,7 +29,9 @@ export default function RootLayout({
           <ConvexClientProvider>
             <SidebarProvider>
               <AppSidebar />
-              {children}
+              <SidebarInset>
+                {children}
+              </SidebarInset>
             </SidebarProvider>
           </ConvexClientProvider>
         </ClerkProvider>
