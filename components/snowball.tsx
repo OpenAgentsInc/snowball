@@ -1,9 +1,9 @@
 "use client";
 
-import { useConversation } from "@11labs/react";
-import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useConversation } from "@11labs/react"
+import { Button } from "./ui/button"
 
 export function Snowball() {
   const [isReady, setIsReady] = useState(false);
@@ -52,8 +52,8 @@ export function Snowball() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-2">
+    <div className="flex flex-col items-center justify-center h-full fixed gap-4">
+      <div className="flex flex-col items-center justify-center gap-2">
         {conversation.status === "disconnected" ? (
           <Button
             onClick={startConversation}
@@ -85,10 +85,10 @@ export function Snowball() {
         {!isReady
           ? "Please allow microphone access"
           : conversation.status === "connected"
-          ? conversation.isSpeaking
-            ? "Snowball is speaking..."
-            : "Listening..."
-          : "Ready to start"}
+            ? conversation.isSpeaking
+              ? "Snowball is speaking..."
+              : "Listening..."
+            : "Ready to start"}
       </div>
     </div>
   );
