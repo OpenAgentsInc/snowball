@@ -17,3 +17,7 @@ Added sidebar layout with demo cards in [PR #1](https://github.com/OpenAgentsInc
 ### 11:10am
 
 I set up an initial Snowball agent in the ElevenLabs UI and tested it using their default widget. Now having OpenAgents help me build a custom version based on their Conversational API.
+
+### 12:05pm
+
+Custom conversational UI works great and is deployed to prod.
