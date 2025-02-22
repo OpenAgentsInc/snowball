@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { SignInAndSignUpButtons } from "./auth"
 
 const leaderboardData = [
   { username: "player1", score: 1000 },
@@ -40,76 +39,81 @@ const tools = [
   "create_pull_request",
 ]
 
-export function AppSidebar() {
+export function LeftSidebar() {
   return (
-    <>
-      {/* Auth buttons positioned absolutely */}
-      <div className="fixed top-2 right-2 z-50">
-        <SignInAndSignUpButtons />
-      </div>
-
-      {/* Left Sidebar */}
-      <Sidebar side="left">
-        <SidebarHeader />
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Leaderboard</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Players</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Username</TableHead>
-                        <TableHead>Score</TableHead>
+    <Sidebar side="left">
+      <SidebarHeader />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Leaderboard</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Players</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Score</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {leaderboardData.map((player) => (
+                      <TableRow key={player.username}>
+                        <TableCell>{player.username}</TableCell>
+                        <TableCell>{player.score}</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {leaderboardData.map((player) => (
-                        <TableRow key={player.username}>
-                          <TableCell>{player.username}</TableCell>
-                          <TableCell>{player.score}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter />
-      </Sidebar>
-
-      {/* Right Sidebar */}
-      <Sidebar side="right">
-        <SidebarHeader />
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Available Tools</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Tools</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {tools.map((tool) => (
-                      <div key={tool} className="text-sm">
-                        {tool}
-                      </div>
                     ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter />
-      </Sidebar>
-    </>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter />
+    </Sidebar>
   )
 }
+
+export function RightSidebar() {
+  return (
+    <Sidebar side="right">
+      <SidebarHeader />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Available Tools</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <Card>
+              <CardHeader>
+                <CardTitle>Tools</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {tools.map((tool) => (
+                    <div key={tool} className="text-sm">
+                      {tool}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter />
+    </Sidebar>
+  )
+}
+
+export function AuthButtons() {
+  return (
+    <div className="fixed top-2 right-2 z-50">
+      <SignInAndSignUpButtons />
+    </div>
+  )
+}
+
+import { SignInAndSignUpButtons } from "./auth"
