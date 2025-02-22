@@ -3,13 +3,14 @@
 import {
     Authenticated, Unauthenticated, useMutation, useQuery
 } from "convex/react"
+import { Snowball } from "@/components/snowball"
 
 export default function Home() {
   return (
     <>
       <main className="container max-w-2xl flex flex-col gap-8">
         <Authenticated>
-          <SignedInContent />
+          <Snowball />
         </Authenticated>
         <Unauthenticated>
           <p>Click one of the buttons in the top right corner to sign in.</p>
@@ -17,14 +18,4 @@ export default function Home() {
       </main>
     </>
   );
-}
-
-
-
-function SignedInContent() {
-  return (
-    <>
-      <elevenlabs-convai agent-id="mNBnpV3KW6ihP9j1BbTT"></elevenlabs-convai>
-    </>
-  )
 }
