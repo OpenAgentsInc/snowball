@@ -1,5 +1,6 @@
 import "./globals.css"
 import { Inter } from "next/font/google"
+import Script from "next/script"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { ClerkProvider } from "@clerk/nextjs"
@@ -9,8 +10,8 @@ import type { Metadata } from "next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "My App Title",
-  description: "My app description",
+  title: "Snowball",
+  description: "The multiplayer agent",
 };
 
 export default function RootLayout({
@@ -20,6 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <Script src="https://elevenlabs.io/convai-widget/index.js" />
       <body className={inter.className}>
         <ClerkProvider>
           <ConvexClientProvider>
