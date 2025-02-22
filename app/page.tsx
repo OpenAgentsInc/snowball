@@ -3,27 +3,19 @@
 import {
     Authenticated, Unauthenticated, useMutation, useQuery
 } from "convex/react"
+import { Snowball } from "@/components/snowball"
 
 export default function Home() {
   return (
-    <>
-      <main className="container max-w-2xl flex flex-col gap-8">
+    <div className="w-full p-4 flex justify-center">
+      <div className="w-full max-w-2xl flex flex-col items-center justify-center">
         <Authenticated>
-          <SignedInContent />
+          <Snowball />
         </Authenticated>
         <Unauthenticated>
           <p>Click one of the buttons in the top right corner to sign in.</p>
         </Unauthenticated>
-      </main>
-    </>
+      </div>
+    </div>
   );
-}
-
-
-
-function SignedInContent() {
-  return (
-    <>
-    </>
-  )
 }

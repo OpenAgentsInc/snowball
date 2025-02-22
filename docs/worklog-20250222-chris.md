@@ -13,3 +13,7 @@ Configured Convex & Clerk for dev and prod. Deployed to https://snowball.openage
 ### 10:20am
 
 Added sidebar layout with demo cards in [PR #1](https://github.com/OpenAgentsInc/snowball/pull/1). You can see how I'm primarily using code-gen with OpenAgents [here](https://github.com/OpenAgentsInc/snowball/pull/1#issuecomment-2676275168), supplemented occasionally by Cursor agent.
+
+### 11:10am
+
+I set up an initial Snowball agent in the ElevenLabs UI and tested it using their default widget. Now having OpenAgents help me build a custom version based on their Conversational API.
