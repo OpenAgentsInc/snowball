@@ -1,10 +1,8 @@
 import "./globals.css"
 import { Inter } from "next/font/google"
 import Script from "next/script"
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-    SidebarInset, SidebarProvider, SidebarTrigger
-} from "@/components/ui/sidebar"
+import { AuthButtons, LeftSidebar, RightSidebar } from "@/components/app-sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { ClerkProvider } from "@clerk/nextjs"
 import { ConvexClientProvider } from "./ConvexClientProvider"
 
@@ -28,10 +26,14 @@ export default function RootLayout({
         <ClerkProvider>
           <ConvexClientProvider>
             <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                {children}
-              </SidebarInset>
+              <div className="flex min-h-screen">
+                <LeftSidebar />
+                <main className="flex-1 flex justify-center">
+                  {children}
+                </main>
+                <RightSidebar />
+              </div>
+              <AuthButtons />
             </SidebarProvider>
           </ConvexClientProvider>
         </ClerkProvider>
