@@ -27,9 +27,7 @@ export default function RootLayout({
           <ConvexClientProvider>
             <SidebarProvider>
               <AppSidebar />
-              <main className="w-full">
-                {children}
-              </main>
+              {children}
             </SidebarProvider>
           </ConvexClientProvider>
         </ClerkProvider>
