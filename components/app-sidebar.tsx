@@ -43,11 +43,15 @@ const tools = [
 export function AppSidebar() {
   return (
     <>
+      {/* Auth buttons positioned absolutely */}
+      <div className="fixed top-2 right-2 z-50">
+        <SignInAndSignUpButtons />
+      </div>
+
       {/* Left Sidebar */}
       <Sidebar side="left">
         <SidebarHeader />
         <SidebarContent>
-          <SignInAndSignUpButtons />
           <SidebarGroup>
             <SidebarGroupLabel>Leaderboard</SidebarGroupLabel>
             <SidebarGroupContent>
