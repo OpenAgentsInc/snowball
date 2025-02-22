@@ -3,15 +3,19 @@
 import { useConversation } from "@11labs/react";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 
 export function Snowball() {
   const [isReady, setIsReady] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [lastMessage, setLastMessage] = useState("");
   const conversation = useConversation({
     onConnect: () => console.log("Connected"),
     onDisconnect: () => console.log("Disconnected"),
-    onMessage: (message) => console.log("Message:", message),
+    onMessage: (message) => {
+      if (message.source === 'ai') {
+        setLastMessage(message.message);
+      }
+    },
     onError: (error) => console.error("Error:", error),
   });
 
@@ -41,17 +45,9 @@ export function Snowball() {
   const endConversation = async () => {
     try {
       await conversation.endSession();
+      setLastMessage("");
     } catch (error) {
       console.error("Failed to end conversation:", error);
-    }
-  };
-
-  const toggleMute = async () => {
-    try {
-      await conversation.setVolume({ volume: isMuted ? 1 : 0 });
-      setIsMuted(!isMuted);
-    } catch (error) {
-      console.error("Failed to toggle mute:", error);
     }
   };
 
@@ -77,21 +73,13 @@ export function Snowball() {
             End Conversation
           </Button>
         )}
-
-        <Button
-          onClick={toggleMute}
-          variant="outline"
-          className="flex items-center gap-2"
-          disabled={conversation.status === "disconnected"}
-        >
-          {isMuted ? (
-            <VolumeX className="w-4 h-4" />
-          ) : (
-            <Volume2 className="w-4 h-4" />
-          )}
-          {isMuted ? "Unmute" : "Mute"}
-        </Button>
       </div>
+
+      {lastMessage && (
+        <div className="max-w-lg p-4 rounded-lg bg-secondary">
+          {lastMessage}
+        </div>
+      )}
 
       <div className="text-sm text-muted-foreground">
         {!isReady
