@@ -8,9 +8,6 @@ export default function Home() {
   return (
     <>
       <main className="container max-w-2xl flex flex-col gap-8">
-        <h1 className="text-4xl font-extrabold my-8 text-center">
-          Snowball
-        </h1>
         <Authenticated>
           <SignedInContent />
         </Authenticated>
@@ -27,7 +24,6 @@ export default function Home() {
 function SignedInContent() {
   return (
     <>
-      <p>Signed in</p>
     </>
   )
 }
