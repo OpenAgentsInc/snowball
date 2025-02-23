@@ -11,12 +11,59 @@ function validateGitHubToken() {
   return token;
 }
 
+// Allowed repositories and paths
+const ALLOWED_REPOS = {
+  'OpenAgentsInc/snowball': {
+    allowedPaths: [
+      'README.md',
+      'package.json',
+      'docs/',
+      'components/',
+      'app/',
+      'tools/'
+    ],
+    publicBranches: ['main']
+  }
+  // Add more repos here as needed
+};
+
+// Check if a path is allowed
+function isAllowedPath(owner: string, repo: string, filepath: string, branch: string): boolean {
+  const repoKey = `${owner}/${repo}`;
+  const repoConfig = ALLOWED_REPOS[repoKey as keyof typeof ALLOWED_REPOS];
+  
+  if (!repoConfig) {
+    console.warn(`Attempted access to unauthorized repo: ${repoKey}`);
+    return false;
+  }
+
+  if (!repoConfig.publicBranches.includes(branch)) {
+    console.warn(`Attempted access to unauthorized branch: ${branch} in ${repoKey}`);
+    return false;
+  }
+
+  return repoConfig.allowedPaths.some(allowedPath => {
+    if (allowedPath.endsWith('/')) {
+      // If it's a directory, allow anything starting with that path
+      return filepath.startsWith(allowedPath);
+    }
+    // For files, require exact match
+    return filepath === allowedPath;
+  });
+}
+
 // Tool handlers
 const handlers = {
   view_file: async (params: any) => {
     const token = validateGitHubToken();
-    const { path, owner, repo, branch } = params;
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+    const { path: filepath, owner, repo, branch } = params;
+    
+    // Check if this is an allowed path
+    if (!isAllowedPath(owner, repo, filepath, branch)) {
+      throw new Error('This file is not publicly accessible');
+    }
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}?ref=${branch}`;
     
     try {
       const response = await fetch(url, {
@@ -32,7 +79,7 @@ const handlers = {
       }
 
       if (response.status === 404) {
-        throw new Error(`File not found: ${path}`);
+        throw new Error(`File not found: ${filepath}`);
       }
 
       if (!response.ok) {
@@ -47,7 +94,7 @@ const handlers = {
         throw new Error('Sorry, I cannot access GitHub right now due to an authentication issue. Please try again later or contact support.');
       }
       if (error.message.includes('not found')) {
-        throw new Error(`I couldn't find that file. Are you sure '${path}' exists in ${owner}/${repo} on branch '${branch}'?`);
+        throw new Error(`I couldn't find that file. Are you sure '${filepath}' exists in ${owner}/${repo} on branch '${branch}'?`);
       }
       throw error;
     }
