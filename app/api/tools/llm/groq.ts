@@ -3,6 +3,13 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { Tool } from '../types';
 
+// Default values for GitHub tools
+const DEFAULTS = {
+  owner: 'OpenAgentsInc',
+  repo: 'snowball',
+  branch: 'main'
+};
+
 export async function selectTool(intent: string, tools: Tool[]) {
   const model = groq('llama-3.3-70b-versatile');
   
@@ -42,8 +49,21 @@ Think through this step by step:
 1. What is the user trying to do?
 2. Which tool best matches this intent?
 3. What parameters can be extracted from the intent?
-4. How confident are you in this selection?`
+4. How confident are you in this selection?
+
+Note: For GitHub operations, if owner/repo/branch are not specified:
+- Default owner: ${DEFAULTS.owner}
+- Default repo: ${DEFAULTS.repo}
+- Default branch: ${DEFAULTS.branch}`
   });
+
+  // Apply defaults for GitHub tools
+  if (object.tool.startsWith('view_')) {
+    object.parameters = {
+      ...DEFAULTS,
+      ...object.parameters
+    };
+  }
 
   return object;
 }
@@ -71,7 +91,12 @@ Check:
 2. Are all required parameters present and valid?
 3. Do the parameter values make sense for the intent?
 
-If validation fails, suggest how the user could rephrase their request.`,
+If validation fails, suggest how the user could rephrase their request.
+
+Note: For GitHub operations, these defaults are acceptable:
+- Owner: ${DEFAULTS.owner}
+- Repo: ${DEFAULTS.repo}
+- Branch: ${DEFAULTS.branch}`,
     prompt: `User intent: "${intent}"
 
 Selected tool: ${selectedTool}
