@@ -13,10 +13,12 @@
         "type": "object",
         "properties": {
           "tool": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the tool to use"
           },
           "parameters": {
-            "type": "object"
+            "type": "object",
+            "description": "Parameters to pass to the tool"
           }
         },
         "required": ["tool", "parameters"]
