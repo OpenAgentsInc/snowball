@@ -2,7 +2,7 @@
   "tool_config": {
     "type": "webhook",
     "name": "use_tool",
-    "description": "Tell Snowball what you want to do",
+    "description": "Express what you want to do in natural language. For example:\n- 'read the README file'\n- 'show me what's in config.json'\n- 'create a new branch called feature/xyz'\n- 'open a pull request for my changes'\n\nInclude relevant details in your request, but don't worry about exact file paths or repository details - I'll figure those out. If you need something from a specific branch or repository, mention it naturally in your request.",
     "api_schema": {
       "url": "https://snowball.openagents.com/api/tools/route",
       "method": "POST",
@@ -14,11 +14,11 @@
         "properties": {
           "intent": {
             "type": "string",
-            "description": "What you want to do (e.g. 'read this file', 'create a branch', etc)"
+            "description": "Express your goal in plain English. Focus on WHAT you want, not HOW to do it."
           },
           "context": {
             "type": "object",
-            "description": "Any relevant context about what you're trying to do"
+            "description": "Any additional details that might be helpful (branch names, file paths, etc)"
           }
         },
         "required": ["intent"]
