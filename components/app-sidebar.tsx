@@ -1,42 +1,20 @@
 "use client"
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
+  SidebarGroupLabel, SidebarHeader
 } from "@/components/ui/sidebar"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
+import { SignInAndSignUpButtons } from "./auth"
+import { RepoSelector } from "./repo-selector"
 
 const leaderboardData = [
   { username: "player1", score: 1000 },
   { username: "player2", score: 850 },
   { username: "player3", score: 720 },
-]
-
-const tools = [
-  "view_file",
-  "view_hierarchy", 
-  "create_file",
-  "rewrite_file",
-  "delete_file",
-  "create_pull_request",
 ]
 
 export function LeftSidebar() {
@@ -84,22 +62,9 @@ export function RightSidebar() {
       <SidebarHeader />
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Available Tools</SidebarGroupLabel>
+          <SidebarGroupLabel>Repository</SidebarGroupLabel>
           <SidebarGroupContent>
-            <Card>
-              <CardHeader>
-                <CardTitle>Tools</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {tools.map((tool) => (
-                    <div key={tool} className="text-sm">
-                      {tool}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <RepoSelector />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -115,5 +80,3 @@ export function AuthButtons() {
     </div>
   )
 }
-
-import { SignInAndSignUpButtons } from "./auth"
