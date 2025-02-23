@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@11labs/react": "^0.0.7",
+    "@ai-sdk/groq": "^1.1.10",
     "@clerk/clerk-react": "^5.20.0",
     "@clerk/nextjs": "^6.9.2",
     "@hookform/resolvers": "^3.3.2",
@@ -47,6 +48,7 @@
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "ai": "^4.1.45",
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.0.0",
@@ -69,7 +71,7 @@
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.2.2",
-    "zod": "^3.22.4"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
