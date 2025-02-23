@@ -22,9 +22,9 @@ const COMMON_FILES = {
   'license.txt': 'LICENSE'
 };
 
-function normalizeFilePath(path: string, originalIntent: string, context?: string): string {
-  // If context is provided and looks like a file path, use it
-  if (context && (context.includes('/') || context.includes('.'))) {
+function normalizeFilePath(path: string, originalIntent: string, context?: any): string {
+  // If context is provided and is a string that looks like a file path, use it
+  if (typeof context === 'string' && (context.includes('/') || context.includes('.'))) {
     return context;
   }
 
@@ -112,7 +112,7 @@ ${tools.map(t => `- ${t.name}: ${t.description}
   Parameters: ${Object.entries(t.parameters).map(([k,v]) => `${k}: ${v.description} (${v.required ? 'required' : 'optional'})`).join(', ')}`).join('\n')}
 
 User intent: "${intent}"
-Context: ${context ? JSON.stringify(context) : 'None'}
+Context: ${typeof context === 'string' ? context : JSON.stringify(context)}
 
 Select the most appropriate tool and extract parameters from the intent and context.
 
@@ -203,7 +203,7 @@ Note: For GitHub operations, these defaults are acceptable:
 - Repo: ${DEFAULTS.repo}
 - Branch: ${DEFAULTS.branch}`,
     prompt: `User intent: "${intent}"
-Context: ${context ? JSON.stringify(context) : 'None'}
+Context: ${typeof context === 'string' ? context : JSON.stringify(context)}
 
 Selected tool: ${selectedTool}
 Tool definition: ${JSON.stringify(tools.find(t => t.name === selectedTool), null, 2)}
