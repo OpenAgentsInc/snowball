@@ -1,35 +1,46 @@
 {
-  "name": "view_file",
-  "description": "View file contents at path",
-  "type": "server",
-  "category": ["github", "files"],
-  "schema": {
-    "method": "GET",
-    "parameters": [
-      {
-        "name": "path",
-        "type": "string",
-        "description": "The path of the file to view",
-        "required": true
+  "tool_config": {
+    "type": "webhook",
+    "name": "github_tool",
+    "description": "Execute GitHub operations like viewing files, creating branches, and managing pull requests",
+    "api_schema": {
+      "url": "https://snowball.openagents.com/api/tools/route",
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
       },
-      {
-        "name": "owner",
-        "type": "string",
-        "description": "The owner of the repository",
-        "required": true
-      },
-      {
-        "name": "repo",
-        "type": "string",
-        "description": "The name of the repository",
-        "required": true
-      },
-      {
-        "name": "branch",
-        "type": "string",
-        "description": "The branch to view the file from",
-        "required": true
+      "body_params_schema": {
+        "tool": {
+          "type": "string",
+          "description": "The GitHub tool to execute (e.g., view_file, create_branch, etc.)"
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Parameters for the tool",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "File path (for file operations)"
+            },
+            "owner": {
+              "type": "string",
+              "description": "Repository owner"
+            },
+            "repo": {
+              "type": "string",
+              "description": "Repository name"
+            },
+            "branch": {
+              "type": "string",
+              "description": "Branch name"
+            },
+            "content": {
+              "type": "string",
+              "description": "File content (for create/update operations)"
+            }
+          }
+        }
       }
-    ]
+    }
   }
 }
