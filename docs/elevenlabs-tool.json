@@ -2,7 +2,7 @@
   "tool_config": {
     "type": "webhook",
     "name": "use_tool",
-    "description": "Use a tool from Snowball's registry. Tools include GitHub operations like viewing files, creating branches, and managing pull requests.",
+    "description": "Use any tool from Snowball's registry. Available tools will be listed in the system prompt.",
     "api_schema": {
       "url": "https://snowball.openagents.com/api/tools/route",
       "method": "POST",
@@ -10,14 +10,16 @@
         "Content-Type": "application/json"
       },
       "body_params_schema": {
-        "tool": {
-          "type": "string",
-          "description": "The name of the tool to use from the registry"
+        "type": "object",
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          }
         },
-        "parameters": {
-          "type": "object",
-          "description": "Parameters required by the selected tool"
-        }
+        "required": ["tool", "parameters"]
       }
     }
   }
