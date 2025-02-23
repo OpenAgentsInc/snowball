@@ -89,17 +89,46 @@ export async function POST(request: Request) {
       );
     }
 
-    // Execute the tool
-    const result = await toolHandler(parameters);
+    try {
+      // Execute the tool
+      const result = await toolHandler(parameters);
 
-    // Log the response
-    const response = { result };
-    console.log('\n=== RESPONSE ===');
-    console.log(JSON.stringify(response, null, 2));
-    console.log('=== END RESPONSE ===\n');
+      // Log the response
+      const response = { result };
+      console.log('\n=== RESPONSE ===');
+      console.log(JSON.stringify(response, null, 2));
+      console.log('=== END RESPONSE ===\n');
 
-    // Return the result
-    return NextResponse.json(response);
+      // Return the result
+      return NextResponse.json(response);
+    } catch (error: any) {
+      // Handle tool execution errors
+      console.error('\n=== TOOL ERROR ===');
+      console.error('Error executing tool:', error);
+      console.error('=== END TOOL ERROR ===\n');
+
+      const message = error.message || 'Error executing tool';
+      
+      // Handle specific error cases
+      if (message.includes('not publicly accessible')) {
+        return NextResponse.json({
+          error: `I can't access that ${tool === 'view_file' ? 'file' : 'folder'}. Please check the path and try again.`,
+          parameters
+        }, { status: 403 });
+      }
+      if (message.includes('not found')) {
+        return NextResponse.json({
+          error: `I couldn't find that ${tool === 'view_file' ? 'file' : 'folder'}. Please check the path and try again.`,
+          parameters
+        }, { status: 404 });
+      }
+
+      // Generic error
+      return NextResponse.json({
+        error: message,
+        parameters
+      }, { status: 500 });
+    }
 
   } catch (error: any) {
     // Log the error
