@@ -26,11 +26,34 @@ const handlers = {
 
 export async function POST(request: Request) {
   try {
-    // Parse the incoming request
-    const body = await request.json();
-    const { tool, parameters } = body;
+    // Log all request details
+    console.log('\n=== ELEVENLABS TOOL REQUEST ===');
+    console.log('Timestamp:', new Date().toISOString());
+    
+    // Log headers
+    console.log('\nHeaders:');
+    const headers: Record<string, string> = {};
+    request.headers.forEach((value, key) => {
+      console.log(`${key}: ${value}`);
+      headers[key] = value;
+    });
 
-    console.log('Tool request received:', { tool, parameters });
+    // Get and log raw body
+    const rawBody = await request.text();
+    console.log('\nRaw Body:', rawBody);
+
+    // Parse body and log structured version
+    const body = JSON.parse(rawBody);
+    console.log('\nParsed Body:', JSON.stringify(body, null, 2));
+
+    // Log URL and method
+    console.log('\nRequest URL:', request.url);
+    console.log('Request Method:', request.method);
+    
+    console.log('\n=== END REQUEST DETAILS ===\n');
+
+    // Extract tool and parameters
+    const { tool, parameters } = body;
 
     // Load tool definition
     const toolsDir = path.join(process.cwd(), 'tools');
@@ -72,11 +95,21 @@ export async function POST(request: Request) {
     // Execute the tool
     const result = await handler(parameters);
 
+    // Log the response
+    const response = { result };
+    console.log('\n=== RESPONSE ===');
+    console.log(JSON.stringify(response, null, 2));
+    console.log('=== END RESPONSE ===\n');
+
     // Return the result
-    return NextResponse.json({ result });
+    return NextResponse.json(response);
 
   } catch (error) {
+    // Log the error
+    console.error('\n=== ERROR ===');
     console.error('Error processing tool request:', error);
+    console.error('=== END ERROR ===\n');
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
