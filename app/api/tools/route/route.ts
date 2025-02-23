@@ -24,6 +24,30 @@ const handlers = {
   }
 };
 
+// Find a tool definition file recursively
+async function findToolDefinition(toolsDir: string, toolName: string): Promise<string | null> {
+  try {
+    const entries = await fs.readdir(toolsDir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(toolsDir, entry.name);
+      
+      if (entry.isDirectory()) {
+        // Recursively search subdirectories
+        const found = await findToolDefinition(fullPath, toolName);
+        if (found) return found;
+      } else if (entry.isFile() && entry.name === `${toolName}.json`) {
+        // Found the tool definition
+        return fullPath;
+      }
+    }
+  } catch (error) {
+    console.error('Error searching for tool:', error);
+  }
+  
+  return null;
+}
+
 export async function POST(request: Request) {
   try {
     // Log all request details
@@ -55,19 +79,29 @@ export async function POST(request: Request) {
     // Extract tool and parameters
     const { tool, parameters } = body;
 
-    // Load tool definition
+    // Find tool definition recursively
     const toolsDir = path.join(process.cwd(), 'tools');
-    const toolPath = path.join(toolsDir, `${tool}.json`);
-    let toolDef;
+    const toolPath = await findToolDefinition(toolsDir, tool);
     
-    try {
-      const toolContent = await fs.readFile(toolPath, 'utf8');
-      toolDef = JSON.parse(toolContent);
-    } catch (error) {
-      console.error('Error loading tool definition:', error);
+    if (!toolPath) {
+      console.error('Tool definition not found:', tool);
       return NextResponse.json(
         { error: `Tool '${tool}' not found` },
         { status: 404 }
+      );
+    }
+
+    // Load tool definition
+    let toolDef;
+    try {
+      const toolContent = await fs.readFile(toolPath, 'utf8');
+      toolDef = JSON.parse(toolContent);
+      console.log('\nTool definition loaded:', toolDef);
+    } catch (error) {
+      console.error('Error loading tool definition:', error);
+      return NextResponse.json(
+        { error: `Error loading tool '${tool}'` },
+        { status: 500 }
       );
     }
 
