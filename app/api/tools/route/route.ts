@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     // Use LLM to select tool and extract parameters
-    const { tool, parameters, confidence, reasoning } = await selectTool(intent, availableTools);
+    const { tool, parameters, confidence, reasoning } = await selectTool(intent, availableTools, context);
     
     console.log('\n=== TOOL SELECTION ===');
     console.log('Selected tool:', tool);
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     // Validate selection if confidence is borderline
     if (confidence >= 0.5 && confidence < 0.7) {
-      const validation = await validateToolSelection(intent, tool, parameters, availableTools);
+      const validation = await validateToolSelection(intent, tool, parameters, availableTools, context);
       
       console.log('\n=== VALIDATION ===');
       console.log('Validation result:', validation);
