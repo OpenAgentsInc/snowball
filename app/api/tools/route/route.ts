@@ -58,14 +58,33 @@ function isAllowedPath(owner: string, repo: string, filepath: string, branch: st
 function extractFilePath(intent: string): string | null {
   // Common file patterns
   const patterns = [
-    /(?:read|view|show|get|fetch)\s+(?:the\s+)?([^\s]+(?:\.[\w]+)?)/i,
-    /what'?s?\s+in\s+(?:the\s+)?([^\s]+(?:\.[\w]+)?)/i,
-    /contents?\s+of\s+(?:the\s+)?([^\s]+(?:\.[\w]+)?)/i
+    /(?:read|view|show|get|fetch)\\s+(?:the\\s+)?([^\\s]+(?:\\.[\\w]+)?)/i,
+    /what'?s?\\s+in\\s+(?:the\\s+)?([^\\s]+(?:\\.[\\w]+)?)/i,
+    /contents?\\s+of\\s+(?:the\\s+)?([^\\s]+(?:\\.[\\w]+)?)/i
   ];
 
   // Special cases
   if (intent.toLowerCase().includes('readme')) return 'README.md';
   if (intent.toLowerCase().includes('package.json')) return 'package.json';
+
+  // Try each pattern
+  for (const pattern of patterns) {
+    const match = intent.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
+// Extract folder path from intent
+function extractFolderPath(intent: string): string | null {
+  // Common folder patterns
+  const patterns = [
+    /(?:list|show|view|get)\\s+(?:the\\s+)?(?:contents?\\s+of\\s+)?(?:folder|directory|dir)?\\s*([^\\s]+)/i,
+    /what'?s?\\s+in\\s+(?:the\\s+)?(?:folder|directory|dir)?\\s*([^\\s]+)/i
+  ];
 
   // Try each pattern
   for (const pattern of patterns) {
@@ -128,13 +147,73 @@ const handlers = {
       }
       throw error;
     }
+  },
+
+  view_folder: async (params: any) => {
+    const token = validateGitHubToken();
+    const { path: folderpath, owner, repo, branch } = params;
+
+    if (!folderpath) {
+      throw new Error('Please specify which folder you want to view');
+    }
+
+    // Check if this is an allowed path
+    if (!isAllowedPath(owner, repo, folderpath, branch)) {
+      throw new Error('This folder is not publicly accessible');
+    }
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${folderpath}?ref=${branch}`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Authorization': `Bearer ${token}`,
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('GitHub authentication failed. Please check the token configuration.');
+      }
+
+      if (response.status === 404) {
+        throw new Error(`Folder not found: ${folderpath}`);
+      }
+
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      }
+
+      const contents = await response.json();
+      
+      // Format the response to show files and folders
+      const formattedContents = contents.map((item: any) => ({
+        name: item.name,
+        type: item.type,
+        path: item.path,
+        size: item.size
+      }));
+
+      return formattedContents;
+    } catch (error: any) {
+      // Add context to the error
+      if (error.message.includes('authentication failed')) {
+        console.error('GitHub Auth Error:', error);
+        throw new Error('Sorry, I cannot access GitHub right now due to an authentication issue. Please try again later or contact support.');
+      }
+      if (error.message.includes('not found')) {
+        throw new Error(`I couldn't find that folder. Are you sure '${folderpath}' exists in ${owner}/${repo} on branch '${branch}'?`);
+      }
+      throw error;
+    }
   }
 };
 
 // Intent patterns and their corresponding tools
 const intentPatterns = [
   {
-    pattern: /read|view|show|get|fetch|what'?s?\s+in|contents?\s+of/i,
+    pattern: /read|view|show|get|fetch|what'?s?\\s+in|contents?\\s+of/i,
     tool: 'view_file',
     extractParams: (intent: string, context: any) => {
       // Try to get path from context first
@@ -155,6 +234,33 @@ const intentPatterns = [
       // Validate required params
       if (!params.path) {
         throw new Error('Please specify which file you want to read');
+      }
+
+      return params;
+    }
+  },
+  {
+    pattern: /(?:list|show|view|get)\\s+(?:folder|directory|dir)|what'?s?\\s+in\\s+(?:folder|directory|dir)/i,
+    tool: 'view_folder',
+    extractParams: (intent: string, context: any) => {
+      // Try to get path from context first
+      let folderpath = context.path || context.folder || context.directory;
+      
+      // If no path in context, try to extract from intent
+      if (!folderpath) {
+        folderpath = extractFolderPath(intent);
+      }
+
+      const params = {
+        path: folderpath,
+        owner: context.owner || 'OpenAgentsInc',
+        repo: context.repo || context.repository || 'snowball',
+        branch: context.branch || 'main'
+      };
+
+      // Validate required params
+      if (!params.path) {
+        throw new Error('Please specify which folder you want to view');
       }
 
       return params;
