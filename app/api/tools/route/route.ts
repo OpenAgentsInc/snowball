@@ -13,7 +13,7 @@ const handlers = {
 export async function POST(request: Request) {
   try {
     // Log all request details
-    console.log('\n=== ELEVENLABS TOOL REQUEST ===');
+    console.log('\n=== TOOL REQUEST ===');
     console.log('Timestamp:', new Date().toISOString());
     
     // Log headers
@@ -90,6 +90,11 @@ export async function POST(request: Request) {
     }
 
     try {
+      // Log tool execution attempt
+      console.log('\n=== EXECUTING TOOL ===');
+      console.log('Tool:', tool);
+      console.log('Parameters:', parameters);
+      
       // Execute the tool
       const result = await toolHandler(parameters);
 
@@ -105,6 +110,8 @@ export async function POST(request: Request) {
       // Handle tool execution errors
       console.error('\n=== TOOL ERROR ===');
       console.error('Error executing tool:', error);
+      console.error('Tool:', tool);
+      console.error('Parameters:', parameters);
       console.error('=== END TOOL ERROR ===\n');
 
       const message = error.message || 'Error executing tool';
