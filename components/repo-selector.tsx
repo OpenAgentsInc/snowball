@@ -30,13 +30,13 @@ export function RepoSelector() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Repository Selection</CardTitle>
+        <CardTitle>Active Repo</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="owner">
-              Repository Owner
+              Owner
             </label>
             <Input
               id="owner"
@@ -45,9 +45,9 @@ export function RepoSelector() {
               onChange={(e) => setRepo(e.target.value, name, branch)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="name">
-              Repository Name
+              Name
             </label>
             <Input
               id="name"
@@ -56,7 +56,7 @@ export function RepoSelector() {
               onChange={(e) => setRepo(owner, e.target.value, branch)}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <label className="text-sm font-medium" htmlFor="branch">
               Branch
             </label>
