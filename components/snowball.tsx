@@ -1,14 +1,14 @@
 "use client";
 
-import { useConversation } from "@11labs/react";
-import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useConversation } from "@11labs/react"
+import { Button } from "./ui/button"
 
 export function Snowball() {
   const [isReady, setIsReady] = useState(false);
-  const [messages, setMessages] = useState<{source: string, message: string}[]>([]);
-  
+  const [messages, setMessages] = useState<{ source: string, message: string }[]>([]);
+
   const conversation = useConversation({
     onConnect: () => console.log("Connected"),
     onDisconnect: () => console.log("Disconnected"),
@@ -37,6 +37,14 @@ export function Snowball() {
     try {
       await conversation.startSession({
         agentId: "mNBnpV3KW6ihP9j1BbTT",
+        clientTools: {
+          logMessage: async ({ message }: { message: string }) => {
+            console.log(message);
+          },
+          humdumdrum: async (what) => {
+            console.log('humdumdrum', what);
+          }
+        },
       });
     } catch (error) {
       console.error("Failed to start conversation:", error);
@@ -78,13 +86,12 @@ export function Snowball() {
 
       <div className="w-full max-w-lg space-y-2">
         {messages.map((msg, i) => (
-          <div 
-            key={i} 
-            className={`p-4 rounded-lg ${
-              msg.source === 'ai' 
-                ? 'bg-secondary' 
-                : 'bg-primary text-primary-foreground'
-            }`}
+          <div
+            key={i}
+            className={`p-4 rounded-lg ${msg.source === 'ai'
+              ? 'bg-secondary'
+              : 'bg-primary text-primary-foreground'
+              }`}
           >
             {msg.message}
           </div>
@@ -95,10 +102,10 @@ export function Snowball() {
         {!isReady
           ? "Please allow microphone access"
           : conversation.status === "connected"
-          ? conversation.isSpeaking
-            ? "Snowball is speaking..."
-            : "Listening..."
-          : "Ready to start"}
+            ? conversation.isSpeaking
+              ? "Snowball is speaking..."
+              : "Listening..."
+            : "Ready to start"}
       </div>
     </div>
   );
