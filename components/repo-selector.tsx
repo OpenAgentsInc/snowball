@@ -1,18 +1,30 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { useToast } from "@/components/ui/use-toast"
+import { useRepoStore } from "@/stores/repo-store"
 
 export function RepoSelector() {
-  const [owner, setOwner] = useState("")
-  const [name, setName] = useState("")
-  const [branch, setBranch] = useState("main")
+  const { owner, name, branch, setRepo } = useRepoStore()
+  const { toast } = useToast()
 
   const handleSubmit = () => {
-    // TODO: Implement repository selection logic
-    console.log({ owner, name, branch })
+    if (!owner || !name) {
+      toast({
+        variant: "destructive",
+        title: "Required Fields Missing",
+        description: "Please enter both repository owner and name.",
+      })
+      return
+    }
+
+    setRepo(owner, name, branch)
+    toast({
+      title: "Repository Updated",
+      description: `Set to ${owner}/${name} (${branch})`,
+    })
   }
 
   return (
@@ -30,7 +42,7 @@ export function RepoSelector() {
               id="owner"
               placeholder="e.g. facebook"
               value={owner}
-              onChange={(e) => setOwner(e.target.value)}
+              onChange={(e) => setRepo(e.target.value, name, branch)}
             />
           </div>
           <div className="space-y-2">
@@ -41,7 +53,7 @@ export function RepoSelector() {
               id="name"
               placeholder="e.g. react"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setRepo(owner, e.target.value, branch)}
             />
           </div>
           <div className="space-y-2">
@@ -52,7 +64,7 @@ export function RepoSelector() {
               id="branch"
               placeholder="e.g. main"
               value={branch}
-              onChange={(e) => setBranch(e.target.value)}
+              onChange={(e) => setRepo(owner, name, e.target.value)}
             />
           </div>
           <Button className="w-full" onClick={handleSubmit}>

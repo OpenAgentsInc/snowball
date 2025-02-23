@@ -2,9 +2,10 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import Script from "next/script"
 import {
-    AuthButtons, LeftSidebar, RightSidebar
+  AuthButtons, LeftSidebar, RightSidebar
 } from "@/components/app-sidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/toaster"
 import { ClerkProvider } from "@clerk/nextjs"
 import { ConvexClientProvider } from "./ConvexClientProvider"
 
@@ -36,6 +37,7 @@ export default function RootLayout({
                 <RightSidebar />
               </div>
               <AuthButtons />
+              <Toaster />
             </SidebarProvider>
           </ConvexClientProvider>
         </ClerkProvider>
