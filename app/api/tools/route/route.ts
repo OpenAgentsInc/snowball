@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     console.log('\n=== END REQUEST DETAILS ===\n');
 
     // Extract intent and context
-    const { intent, context = {} } = body;
+    const { intent, context } = body;
 
     if (!intent) {
       return NextResponse.json(
