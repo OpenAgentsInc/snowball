@@ -24,28 +24,28 @@ const handlers = {
   }
 };
 
-// Find a tool definition file recursively
-async function findToolDefinition(toolsDir: string, toolName: string): Promise<string | null> {
-  try {
-    const entries = await fs.readdir(toolsDir, { withFileTypes: true });
-    
-    for (const entry of entries) {
-      const fullPath = path.join(toolsDir, entry.name);
-      
-      if (entry.isDirectory()) {
-        // Recursively search subdirectories
-        const found = await findToolDefinition(fullPath, toolName);
-        if (found) return found;
-      } else if (entry.isFile() && entry.name === `${toolName}.json`) {
-        // Found the tool definition
-        return fullPath;
-      }
+// Intent patterns and their corresponding tools
+const intentPatterns = [
+  {
+    pattern: /read|view|show|get|fetch.*(?:file|content)/i,
+    tool: 'view_file',
+    extractParams: (intent: string, context: any) => {
+      // For now just pass through any provided params
+      // TODO: Use NLP to extract params from intent string
+      return {
+        path: context.path || context.file || context.filepath,
+        owner: context.owner || 'OpenAgentsInc',
+        repo: context.repo || context.repository || 'snowball',
+        branch: context.branch || 'main'
+      };
     }
-  } catch (error) {
-    console.error('Error searching for tool:', error);
   }
-  
-  return null;
+  // TODO: Add more intent patterns for other tools
+];
+
+// Find matching intent handler
+function findIntentHandler(intent: string) {
+  return intentPatterns.find(pattern => pattern.pattern.test(intent));
 }
 
 export async function POST(request: Request) {
@@ -76,58 +76,43 @@ export async function POST(request: Request) {
     
     console.log('\n=== END REQUEST DETAILS ===\n');
 
-    // Extract tool and parameters
-    const { tool, parameters } = body;
+    // Extract intent and context
+    const { intent, context = {} } = body;
 
-    // Find tool definition recursively
-    const toolsDir = path.join(process.cwd(), 'tools');
-    const toolPath = await findToolDefinition(toolsDir, tool);
-    
-    if (!toolPath) {
-      console.error('Tool definition not found:', tool);
+    if (!intent) {
       return NextResponse.json(
-        { error: `Tool '${tool}' not found` },
-        { status: 404 }
-      );
-    }
-
-    // Load tool definition
-    let toolDef;
-    try {
-      const toolContent = await fs.readFile(toolPath, 'utf8');
-      toolDef = JSON.parse(toolContent);
-      console.log('\nTool definition loaded:', toolDef);
-    } catch (error) {
-      console.error('Error loading tool definition:', error);
-      return NextResponse.json(
-        { error: `Error loading tool '${tool}'` },
-        { status: 500 }
-      );
-    }
-
-    // Validate parameters against schema
-    const missingParams = toolDef.schema.parameters
-      .filter(p => p.required && !parameters[p.name])
-      .map(p => p.name);
-
-    if (missingParams.length > 0) {
-      return NextResponse.json(
-        { error: `Missing required parameters: ${missingParams.join(', ')}` },
+        { error: 'Intent is required' },
         { status: 400 }
       );
     }
 
-    // Get the handler for this tool
-    const handler = handlers[tool as keyof typeof handlers];
+    // Find matching intent handler
+    const handler = findIntentHandler(intent);
     if (!handler) {
       return NextResponse.json(
-        { error: `No handler implemented for tool '${tool}'` },
+        { error: `I don't know how to '${intent}'. Please try rephrasing or ask for something else.` },
+        { status: 400 }
+      );
+    }
+
+    console.log('\nMatched intent pattern:', handler.pattern);
+    console.log('Selected tool:', handler.tool);
+
+    // Extract parameters from intent and context
+    const params = handler.extractParams(intent, context);
+    console.log('\nExtracted parameters:', params);
+
+    // Validate required parameters are present
+    const toolHandler = handlers[handler.tool as keyof typeof handlers];
+    if (!toolHandler) {
+      return NextResponse.json(
+        { error: `Tool '${handler.tool}' not implemented yet` },
         { status: 501 }
       );
     }
 
     // Execute the tool
-    const result = await handler(parameters);
+    const result = await toolHandler(params);
 
     // Log the response
     const response = { result };
