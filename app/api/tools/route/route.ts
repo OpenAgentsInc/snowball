@@ -24,11 +24,15 @@ const ALLOWED_REPOS = {
     ],
     publicBranches: ['main']
   }
-  // Add more repos here as needed
 };
 
 // Check if a path is allowed
 function isAllowedPath(owner: string, repo: string, filepath: string, branch: string): boolean {
+  if (!filepath) {
+    console.warn('No filepath provided');
+    return false;
+  }
+
   const repoKey = `${owner}/${repo}`;
   const repoConfig = ALLOWED_REPOS[repoKey as keyof typeof ALLOWED_REPOS];
   
@@ -44,10 +48,8 @@ function isAllowedPath(owner: string, repo: string, filepath: string, branch: st
 
   return repoConfig.allowedPaths.some(allowedPath => {
     if (allowedPath.endsWith('/')) {
-      // If it's a directory, allow anything starting with that path
       return filepath.startsWith(allowedPath);
     }
-    // For files, require exact match
     return filepath === allowedPath;
   });
 }
@@ -57,6 +59,10 @@ const handlers = {
   view_file: async (params: any) => {
     const token = validateGitHubToken();
     const { path: filepath, owner, repo, branch } = params;
+
+    if (!filepath) {
+      throw new Error('Please specify which file you want to read');
+    }
     
     // Check if this is an allowed path
     if (!isAllowedPath(owner, repo, filepath, branch)) {
@@ -107,17 +113,21 @@ const intentPatterns = [
     pattern: /read|view|show|get|fetch.*(?:file|content)/i,
     tool: 'view_file',
     extractParams: (intent: string, context: any) => {
-      // For now just pass through any provided params
-      // TODO: Use NLP to extract params from intent string
-      return {
+      const params = {
         path: context.path || context.file || context.filepath,
         owner: context.owner || 'OpenAgentsInc',
         repo: context.repo || context.repository || 'snowball',
         branch: context.branch || 'main'
       };
+
+      // Validate required params
+      if (!params.path) {
+        throw new Error('Please specify which file you want to read');
+      }
+
+      return params;
     }
   }
-  // TODO: Add more intent patterns for other tools
 ];
 
 // Find matching intent handler
@@ -175,30 +185,38 @@ export async function POST(request: Request) {
     console.log('\nMatched intent pattern:', handler.pattern);
     console.log('Selected tool:', handler.tool);
 
-    // Extract parameters from intent and context
-    const params = handler.extractParams(intent, context);
-    console.log('\nExtracted parameters:', params);
+    try {
+      // Extract parameters from intent and context
+      const params = handler.extractParams(intent, context);
+      console.log('\nExtracted parameters:', params);
 
-    // Validate required parameters are present
-    const toolHandler = handlers[handler.tool as keyof typeof handlers];
-    if (!toolHandler) {
+      // Validate required parameters are present
+      const toolHandler = handlers[handler.tool as keyof typeof handlers];
+      if (!toolHandler) {
+        return NextResponse.json(
+          { error: `I understand you want to ${handler.tool}, but I haven't learned how to do that yet.` },
+          { status: 501 }
+        );
+      }
+
+      // Execute the tool
+      const result = await toolHandler(params);
+
+      // Log the response
+      const response = { result };
+      console.log('\n=== RESPONSE ===');
+      console.log(JSON.stringify(response, null, 2));
+      console.log('=== END RESPONSE ===\n');
+
+      // Return the result
+      return NextResponse.json(response);
+    } catch (error: any) {
+      // Handle parameter extraction errors
       return NextResponse.json(
-        { error: `I understand you want to ${handler.tool}, but I haven't learned how to do that yet.` },
-        { status: 501 }
+        { error: error.message },
+        { status: 400 }
       );
     }
-
-    // Execute the tool
-    const result = await toolHandler(params);
-
-    // Log the response
-    const response = { result };
-    console.log('\n=== RESPONSE ===');
-    console.log(JSON.stringify(response, null, 2));
-    console.log('=== END RESPONSE ===\n');
-
-    // Return the result
-    return NextResponse.json(response);
 
   } catch (error: any) {
     // Log the error
