@@ -7,21 +7,6 @@ export function validateGitHubToken() {
   return token;
 }
 
-// Allowed repositories and paths
-const ALLOWED_REPOS = {
-  'OpenAgentsInc/snowball': {
-    allowedPaths: [
-      'README.md',
-      'package.json',
-      'docs/',
-      'components/',
-      'app/',
-      'tools/'
-    ],
-    publicBranches: ['main']
-  }
-};
-
 // Check if a path is allowed
 export function isAllowedPath(owner: string, repo: string, filepath: string, branch: string): boolean {
   if (!filepath) {
@@ -29,23 +14,11 @@ export function isAllowedPath(owner: string, repo: string, filepath: string, bra
     return false;
   }
 
-  const repoKey = `${owner}/${repo}`;
-  const repoConfig = ALLOWED_REPOS[repoKey as keyof typeof ALLOWED_REPOS];
-  
-  if (!repoConfig) {
-    console.warn(`Attempted access to unauthorized repo: ${repoKey}`);
+  // Only allow access to OpenAgentsInc/snowball on main branch
+  if (owner !== 'OpenAgentsInc' || repo !== 'snowball' || branch !== 'main') {
+    console.warn(`Attempted access to unauthorized repo/branch: ${owner}/${repo}@${branch}`);
     return false;
   }
 
-  if (!repoConfig.publicBranches.includes(branch)) {
-    console.warn(`Attempted access to unauthorized branch: ${branch} in ${repoKey}`);
-    return false;
-  }
-
-  return repoConfig.allowedPaths.some(allowedPath => {
-    if (allowedPath.endsWith('/')) {
-      return filepath.startsWith(allowedPath);
-    }
-    return filepath === allowedPath;
-  });
+  return true;
 }
