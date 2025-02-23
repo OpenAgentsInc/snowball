@@ -54,6 +54,30 @@ function isAllowedPath(owner: string, repo: string, filepath: string, branch: st
   });
 }
 
+// Extract file path from intent
+function extractFilePath(intent: string): string | null {
+  // Common file patterns
+  const patterns = [
+    /(?:read|view|show|get|fetch)\s+(?:the\s+)?([^\s]+(?:\.[\w]+)?)/i,
+    /what'?s?\s+in\s+(?:the\s+)?([^\s]+(?:\.[\w]+)?)/i,
+    /contents?\s+of\s+(?:the\s+)?([^\s]+(?:\.[\w]+)?)/i
+  ];
+
+  // Special cases
+  if (intent.toLowerCase().includes('readme')) return 'README.md';
+  if (intent.toLowerCase().includes('package.json')) return 'package.json';
+
+  // Try each pattern
+  for (const pattern of patterns) {
+    const match = intent.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
 // Tool handlers
 const handlers = {
   view_file: async (params: any) => {
@@ -110,11 +134,19 @@ const handlers = {
 // Intent patterns and their corresponding tools
 const intentPatterns = [
   {
-    pattern: /read|view|show|get|fetch.*(?:file|content)/i,
+    pattern: /read|view|show|get|fetch|what'?s?\s+in|contents?\s+of/i,
     tool: 'view_file',
     extractParams: (intent: string, context: any) => {
+      // Try to get path from context first
+      let filepath = context.path || context.file || context.filepath;
+      
+      // If no path in context, try to extract from intent
+      if (!filepath) {
+        filepath = extractFilePath(intent);
+      }
+
       const params = {
-        path: context.path || context.file || context.filepath,
+        path: filepath,
         owner: context.owner || 'OpenAgentsInc',
         repo: context.repo || context.repository || 'snowball',
         branch: context.branch || 'main'
