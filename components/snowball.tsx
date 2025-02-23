@@ -2,22 +2,24 @@
 
 import { Mic, MicOff } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useRepoStore } from "@/stores/repo-store"
 import { useConversation } from "@11labs/react"
 import { Button } from "./ui/button"
 
 export function Snowball() {
   const [isReady, setIsReady] = useState(false);
   const [messages, setMessages] = useState<{ source: string, message: string }[]>([]);
+  const getRepoState = useRepoStore.getState;
 
   const conversation = useConversation({
     onConnect: () => console.log("Connected"),
     onDisconnect: () => console.log("Disconnected"),
-    onMessage: (message) => {
+    onMessage: (message: { source: string, message: string }) => {
       if (message.source === 'ai' || message.source === 'user') {
         setMessages(prev => [...prev, message]);
       }
     },
-    onError: (error) => console.error("Error:", error),
+    onError: (error: Error) => console.error("Error:", error),
   });
 
   useEffect(() => {
@@ -38,11 +40,9 @@ export function Snowball() {
       await conversation.startSession({
         agentId: "mNBnpV3KW6ihP9j1BbTT",
         clientTools: {
-          logMessage: async ({ message }: { message: string }) => {
-            console.log(message);
-          },
-          humdumdrum: async (what) => {
-            console.log('humdumdrum', what);
+          get_active_repo: async () => {
+            const state = getRepoState();
+            return "Active repo: " + state.owner + "/" + state.name + " " + state.branch;
           }
         },
       });
