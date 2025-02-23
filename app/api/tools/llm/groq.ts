@@ -22,7 +22,12 @@ const COMMON_FILES = {
   'license.txt': 'LICENSE'
 };
 
-function normalizeFilePath(path: string, originalIntent: string): string {
+function normalizeFilePath(path: string, originalIntent: string, context?: string): string {
+  // If context is provided and looks like a file path, use it
+  if (context && (context.includes('/') || context.includes('.'))) {
+    return context;
+  }
+
   // If path contains a directory separator, treat it as an explicit path
   if (path.includes('/')) {
     return path;
@@ -63,7 +68,7 @@ function normalizeFilePath(path: string, originalIntent: string): string {
   return path;
 }
 
-export async function selectTool(intent: string, tools: Tool[]) {
+export async function selectTool(intent: string, tools: Tool[], context?: any) {
   const model = groq('llama-3.3-70b-versatile');
   
   const { object } = await generateObject({
@@ -77,14 +82,14 @@ export async function selectTool(intent: string, tools: Tool[]) {
     system: `You are a tool selection agent. Given a user's intent and available tools, select the most appropriate tool and extract required parameters.
 
 Your task is to:
-1. Understand the user's intent
+1. Understand the user's intent and context
 2. Select the most appropriate tool from the available options
-3. Extract required parameters from the intent
+3. Extract required parameters from the intent and context
 4. Provide reasoning for your selection
 5. Assign a confidence score (0-1) for your selection
 
-IMPORTANT: When a specific file path is provided (e.g., "docs/file.md" or "src/components/Button.tsx"):
-- Use the exact path as provided
+IMPORTANT: When a file path is provided in the context:
+- Use the exact path from the context
 - Do not default to README.md or other common files
 - Maintain the original path structure and file extension
 
@@ -107,13 +112,14 @@ ${tools.map(t => `- ${t.name}: ${t.description}
   Parameters: ${Object.entries(t.parameters).map(([k,v]) => `${k}: ${v.description} (${v.required ? 'required' : 'optional'})`).join(', ')}`).join('\n')}
 
 User intent: "${intent}"
+Context: ${context ? JSON.stringify(context) : 'None'}
 
-Select the most appropriate tool and extract parameters from the intent.
+Select the most appropriate tool and extract parameters from the intent and context.
 
 Think through this step by step:
 1. What is the user trying to do?
 2. Which tool best matches this intent?
-3. What parameters can be extracted from the intent?
+3. What parameters can be extracted from the intent and context?
 4. How confident are you in this selection?
 
 Note: For GitHub operations, if owner/repo/branch are not specified:
@@ -122,7 +128,7 @@ Note: For GitHub operations, if owner/repo/branch are not specified:
 - Default branch: ${DEFAULTS.branch}
 
 Remember:
-- If a specific file path is provided, use it exactly as given
+- If a file path is provided in the context, use it exactly as given
 - Only normalize common files like README when no specific path is given
 - Always include file extensions in paths`
   });
@@ -130,6 +136,7 @@ Remember:
   // Log the LLM's selection
   console.log('\n=== LLM TOOL SELECTION ===');
   console.log('Intent:', intent);
+  console.log('Context:', context);
   console.log('Selected tool:', object.tool);
   console.log('Initial parameters:', object.parameters);
   console.log('Confidence:', object.confidence);
@@ -146,7 +153,7 @@ Remember:
     // Normalize file path if it's a file view
     if (object.tool === 'view_file' && object.parameters.path) {
       const originalPath = object.parameters.path;
-      object.parameters.path = normalizeFilePath(object.parameters.path, intent);
+      object.parameters.path = normalizeFilePath(object.parameters.path, intent, context);
       
       // Log path normalization
       if (originalPath !== object.parameters.path) {
@@ -165,7 +172,8 @@ export async function validateToolSelection(
   intent: string,
   selectedTool: string,
   parameters: Record<string, any>,
-  tools: Tool[]
+  tools: Tool[],
+  context?: any
 ) {
   const model = groq('llama-3.3-70b-versatile');
   
@@ -174,7 +182,7 @@ export async function validateToolSelection(
     schema: z.object({
       isValid: z.boolean(),
       missingParameters: z.array(z.string()),
-      suggestedPrompt: z.string().optional(),
+      suggestedPrompt: z.string().optional().nullable(),
       reasoning: z.string()
     }),
     system: `You are a tool validation agent. Your job is to verify that a selected tool and parameters match the user's intent and meet all requirements.
@@ -184,7 +192,7 @@ Check:
 2. Are all required parameters present and valid?
 3. Do the parameter values make sense for the intent?
 4. For files, verify paths are handled correctly:
-   - Explicit paths (e.g., "docs/file.md") should be preserved exactly
+   - Use exact paths from context when provided
    - Only normalize common files (README, LICENSE) when no specific path given
    - Always ensure proper file extensions
 
@@ -195,6 +203,7 @@ Note: For GitHub operations, these defaults are acceptable:
 - Repo: ${DEFAULTS.repo}
 - Branch: ${DEFAULTS.branch}`,
     prompt: `User intent: "${intent}"
+Context: ${context ? JSON.stringify(context) : 'None'}
 
 Selected tool: ${selectedTool}
 Tool definition: ${JSON.stringify(tools.find(t => t.name === selectedTool), null, 2)}
