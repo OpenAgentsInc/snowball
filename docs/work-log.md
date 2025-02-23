@@ -25,3 +25,7 @@ Custom conversational UI works great and is deployed to prod.
 ### 1:05pm
 
 Cloned Kiki's voice via ElevenLabs and connected to the Snowball agent. Brainstormed the 3D canvas and Kiki wrote an art design spec [here](https://github.com/OpenAgentsInc/snowball/blob/ca12d927b3255305f0ff9344d6777c1919078c22/docs/Web%20App%20Design%20Spec.md).
+
+### 7:10pm
+
+Got the agent using both client and server tools via ElevenLabs, with a web scraper via Firecrawl as the first real tool. Took awhile to figure out how to make the agent use the auth token; had to write a custom webhook endpoint to debug the request payload because the ElevenLabs documentation wasn't clear.
