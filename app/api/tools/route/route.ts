@@ -1,18 +1,14 @@
 import { NextResponse } from "next/server";
 import { view_file } from '../handlers/github/view_file';
 import { view_folder } from '../handlers/github/view_folder';
-import { githubIntents } from '../intents/github';
+import { selectTool, validateToolSelection } from '../llm/groq';
+import { availableTools } from '../types';
 
 // Tool handlers
 const handlers = {
   view_file,
   view_folder
 };
-
-// Find matching intent handler
-function findIntentHandler(intent: string) {
-  return githubIntents.find(pattern => pattern.pattern.test(intent));
-}
 
 export async function POST(request: Request) {
   try {
@@ -52,50 +48,58 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find matching intent handler
-    const handler = findIntentHandler(intent);
-    if (!handler) {
-      return NextResponse.json(
-        { error: `I'm not sure how to '${intent}'. Could you rephrase that or try asking for something else?` },
-        { status: 400 }
-      );
-    }
+    // Use LLM to select tool and extract parameters
+    const { tool, parameters, confidence, reasoning } = await selectTool(intent, availableTools);
+    
+    console.log('\n=== TOOL SELECTION ===');
+    console.log('Selected tool:', tool);
+    console.log('Confidence:', confidence);
+    console.log('Reasoning:', reasoning);
+    console.log('Parameters:', parameters);
+    console.log('=== END TOOL SELECTION ===\n');
 
-    console.log('\nMatched intent pattern:', handler.pattern);
-    console.log('Selected tool:', handler.tool);
+    // Validate selection if confidence is borderline
+    if (confidence >= 0.5 && confidence < 0.7) {
+      const validation = await validateToolSelection(intent, tool, parameters, availableTools);
+      
+      console.log('\n=== VALIDATION ===');
+      console.log('Validation result:', validation);
+      console.log('=== END VALIDATION ===\n');
 
-    try {
-      // Extract parameters from intent and context
-      const params = handler.extractParams(intent, context);
-      console.log('\nExtracted parameters:', params);
-
-      // Validate required parameters are present
-      const toolHandler = handlers[handler.tool as keyof typeof handlers];
-      if (!toolHandler) {
-        return NextResponse.json(
-          { error: `I understand you want to ${handler.tool}, but I haven't learned how to do that yet.` },
-          { status: 501 }
-        );
+      if (!validation.isValid) {
+        return NextResponse.json({
+          error: `I'm not sure I understood correctly. ${validation.reasoning}${validation.suggestedPrompt ? `\n\nTry rephrasing like this: "${validation.suggestedPrompt}"` : ''}`,
+          missingParameters: validation.missingParameters
+        }, { status: 400 });
       }
+    }
+    // Reject if confidence is too low
+    else if (confidence < 0.5) {
+      return NextResponse.json({
+        error: `I'm not confident I understand what you want to do. Could you rephrase that?\n\nMy understanding: ${reasoning}`,
+      }, { status: 400 });
+    }
 
-      // Execute the tool
-      const result = await toolHandler(params);
-
-      // Log the response
-      const response = { result };
-      console.log('\n=== RESPONSE ===');
-      console.log(JSON.stringify(response, null, 2));
-      console.log('=== END RESPONSE ===\n');
-
-      // Return the result
-      return NextResponse.json(response);
-    } catch (error: any) {
-      // Handle parameter extraction errors
+    // Get the tool handler
+    const toolHandler = handlers[tool as keyof typeof handlers];
+    if (!toolHandler) {
       return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
+        { error: `I understand you want to ${tool}, but I haven't learned how to do that yet.` },
+        { status: 501 }
       );
     }
+
+    // Execute the tool
+    const result = await toolHandler(parameters);
+
+    // Log the response
+    const response = { result };
+    console.log('\n=== RESPONSE ===');
+    console.log(JSON.stringify(response, null, 2));
+    console.log('=== END RESPONSE ===\n');
+
+    // Return the result
+    return NextResponse.json(response);
 
   } catch (error: any) {
     // Log the error
