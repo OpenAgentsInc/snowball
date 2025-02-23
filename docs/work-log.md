@@ -29,3 +29,7 @@ Cloned Kiki's voice via ElevenLabs and connected to the Snowball agent. Brainsto
 ### 7:10pm
 
 Got the agent using both client and server tools via ElevenLabs, with a web scraper via Firecrawl as the first real tool. Took awhile to figure out how to make the agent use the auth token; had to write a custom webhook endpoint to debug the request payload because the ElevenLabs documentation wasn't clear.
+
+### 8:05pm
+
+Had an amazing conversation with Snowball where I guided it to think about its own codebase and brainstorm how to solve [issue #5](https://github.com/OpenAgentsInc/snowball/issues/5), the tool registry. Transcribed [here](docs/conversation01.md)
