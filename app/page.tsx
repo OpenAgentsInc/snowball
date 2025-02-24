@@ -1,7 +1,7 @@
 "use client";
 
 import {
-    Authenticated, Unauthenticated, useMutation, useQuery
+  Authenticated, Unauthenticated, useMutation, useQuery
 } from "convex/react"
 import { Snowball } from "@/components/snowball"
 
@@ -13,7 +13,7 @@ export default function Home() {
           <Snowball />
         </Authenticated>
         <Unauthenticated>
-          <p>Click one of the buttons in the top right corner to sign in.</p>
+          <p className="mt-8 text-white/70">Click one of the buttons in the top right corner to sign in.</p>
         </Unauthenticated>
       </div>
     </div>
