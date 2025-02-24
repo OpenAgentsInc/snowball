@@ -5,6 +5,7 @@ import { useRepoStore } from "@/stores/repo-store"
 import { useConversation } from "@11labs/react"
 import { MessageInput } from "./message-input"
 import { MessageList } from "@/components/ui/message-list"
+import { RepoSelector } from "./repo-selector"
 
 interface Message {
   id: string
@@ -97,6 +98,7 @@ export function Snowball() {
           </div>
         </div>
       </div>
+      <RepoSelector />
     </>
   );
 }

@@ -11,13 +11,14 @@ interface MarkdownRendererProps {
 
 export function MarkdownRenderer({ children }: MarkdownRendererProps) {
   return (
-    <Markdown
-      remarkPlugins={[remarkGfm]}
-      components={COMPONENTS}
-      className="space-y-3"
-    >
-      {children}
-    </Markdown>
+    <div className="space-y-3">
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={COMPONENTS}
+      >
+        {children}
+      </Markdown>
+    </div>
   )
 }
 
