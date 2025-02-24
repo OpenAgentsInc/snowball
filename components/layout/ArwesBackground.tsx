@@ -5,7 +5,7 @@ import { Animator, Dots, GridLines } from "@arwes/react"
 export const ArwesBackground = () => {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-[#030711]/95" />
+      <div className="absolute inset-0 bg-black" />
       <Animator active>
         <GridLines
           lineColor="rgba(255, 255, 255, 0.03)"

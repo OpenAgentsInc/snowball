@@ -1,11 +1,18 @@
 "use client"
 import React from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { ArrowUp, Paperclip, Square, X } from "lucide-react"
+import { ArrowUp, Mic, MicOff, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-export function MessageInput() {
+interface MessageInputProps {
+  isReady: boolean
+  isConnected: boolean
+  onStart: () => Promise<void>
+  onStop: () => Promise<void>
+}
+
+export function MessageInput({ isReady, isConnected, onStart, onStop }: MessageInputProps) {
   return (
     <div className="relative flex w-full">
       <textarea
@@ -14,8 +21,15 @@ export function MessageInput() {
         className="z-10 w-full grow resize-none rounded-xl border border-input bg-background p-3 pr-24 text-sm ring-offset-background transition-[border] placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
       />
       <div className="absolute right-3 top-3 z-20 flex gap-2">
-        <Button size="icon" variant="outline" className="h-8 w-8" aria-label="Attach a file">
-          <Paperclip className="h-4 w-4" />
+        <Button
+          size="icon"
+          variant={isConnected ? "destructive" : "outline"}
+          className="h-8 w-8"
+          disabled={!isReady}
+          onClick={isConnected ? onStop : onStart}
+          aria-label={isConnected ? "Stop conversation" : "Start conversation"}
+        >
+          {isConnected ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
         </Button>
         <Button size="icon" className="h-8 w-8" aria-label="Send message">
           <ArrowUp className="h-5 w-5" />
