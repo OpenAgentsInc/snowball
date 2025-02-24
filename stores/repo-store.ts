@@ -5,8 +5,10 @@ interface RepoState {
   owner: string
   name: string
   branch: string
+  isCodePaneVisible: boolean
   setRepo: (owner: string, name: string, branch: string) => void
   clearRepo: () => void
+  toggleCodePane: () => void
 }
 
 export const useRepoStore = create<RepoState>()(
@@ -15,9 +17,11 @@ export const useRepoStore = create<RepoState>()(
       owner: '',
       name: '',
       branch: 'main',
+      isCodePaneVisible: false, // start with it hidden
       setRepo: (owner: string, name: string, branch: string) =>
         set({ owner, name, branch }),
       clearRepo: () => set({ owner: '', name: '', branch: 'main' }),
+      toggleCodePane: () => set((state) => ({ isCodePaneVisible: !state.isCodePaneVisible })),
     }),
     {
       name: 'repo-storage', // unique name for localStorage
@@ -25,6 +29,7 @@ export const useRepoStore = create<RepoState>()(
         owner: state.owner,
         name: state.name,
         branch: state.branch,
+        isCodePaneVisible: state.isCodePaneVisible,
       }), // only persist these fields
     }
   )
