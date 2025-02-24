@@ -1,22 +1,41 @@
 "use client";
 
-import { Mic, MicOff } from "lucide-react"
 import { useEffect, useState } from "react"
-import { useRepoStore } from "@/stores/repo-store"
+import { useRepoStore, useCodePaneStore } from "@/stores/repo-store"
 import { useConversation } from "@11labs/react"
-import { Button } from "./ui/button"
+import { MessageInput } from "./message-input"
+import { MessageList } from "@/components/ui/message-list"
+import { RepoSelector } from "./repo-selector"
+import { Card } from "@/components/ui/card"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  createdAt?: Date
+}
 
 export function Snowball() {
   const [isReady, setIsReady] = useState(false);
-  const [messages, setMessages] = useState<{ source: string, message: string }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const getRepoState = useRepoStore.getState;
+  const isCodePaneVisible = useCodePaneStore((state) => state.isCodePaneVisible);
+  const codeContent = useCodePaneStore((state) => state.codeContent);
+  const setCodeContent = useCodePaneStore((state) => state.setCodeContent);
+  const toggleCodePane = useCodePaneStore((state) => state.toggleCodePane);
 
   const conversation = useConversation({
     onConnect: () => console.log("Connected"),
     onDisconnect: () => console.log("Disconnected"),
     onMessage: (message: { source: string, message: string }) => {
       if (message.source === 'ai' || message.source === 'user') {
-        setMessages(prev => [...prev, message]);
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          role: message.source === 'ai' ? 'assistant' : 'user',
+          content: message.message,
+          createdAt: new Date()
+        }]);
       }
     },
     onError: (error: Error) => console.error("Error:", error),
@@ -41,8 +60,17 @@ export function Snowball() {
         agentId: "mNBnpV3KW6ihP9j1BbTT",
         clientTools: {
           get_active_repo: async () => {
+            console.log("get_active_repo")
             const state = getRepoState();
             return "Active repo: " + state.owner + "/" + state.name + " " + state.branch;
+          },
+          show_code: async (data: { content?: string }) => {
+            console.log("show_code", data)
+            if (data.content) {
+              setCodeContent(data.content);
+            }
+            toggleCodePane();
+            return `Code pane is now ${isCodePaneVisible ? 'hidden' : 'visible'}`;
           }
         },
       });
@@ -61,52 +89,44 @@ export function Snowball() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-2">
-        {conversation.status === "disconnected" ? (
-          <Button
-            onClick={startConversation}
-            disabled={!isReady}
-            className="flex items-center gap-2"
-          >
-            <Mic className="w-4 h-4" />
-            Start Conversation
-          </Button>
-        ) : (
-          <Button
-            onClick={endConversation}
-            variant="destructive"
-            className="flex items-center gap-2"
-          >
-            <MicOff className="w-4 h-4" />
-            End Conversation
-          </Button>
+    <>
+      <div className="flex h-[calc(100vh-8rem)] gap-6 px-6">
+        <div className={`flex-1 flex flex-col ${isCodePaneVisible ? 'items-start' : 'items-center'}`}>
+          <div className={`${isCodePaneVisible ? 'w-[600px]' : 'w-full max-w-lg'} h-full overflow-y-auto pb-24`}>
+            <MessageList
+              messages={messages}
+              isTyping={conversation.isSpeaking}
+              messageOptions={(message) => ({
+                className: `${message.role === 'assistant' ? 'bg-secondary' : 'bg-primary text-primary-foreground'}`
+              })}
+            />
+          </div>
+        </div>
+
+        {isCodePaneVisible && (
+          <Card className="w-[600px] h-full overflow-y-auto">
+            <div className="h-full prose prose-sm dark:prose-invert p-6">
+              <MarkdownRenderer>
+                {codeContent || ''}
+              </MarkdownRenderer>
+            </div>
+          </Card>
         )}
       </div>
 
-      <div className="w-full max-w-lg space-y-2">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`p-4 rounded-lg ${msg.source === 'ai'
-              ? 'bg-secondary'
-              : 'bg-primary text-primary-foreground'
-              }`}
-          >
-            {msg.message}
+      <div className="fixed bottom-6 left-0 right-0 z-50">
+        <div className={`mx-auto px-4 ${isCodePaneVisible ? 'w-[600px]' : 'max-w-lg'}`}>
+          <div className="shadow-lg rounded-xl">
+            <MessageInput
+              isReady={isReady}
+              isConnected={conversation.status === "connected"}
+              onStart={startConversation}
+              onStop={endConversation}
+            />
           </div>
-        ))}
+        </div>
       </div>
-
-      <div className="text-sm text-muted-foreground">
-        {!isReady
-          ? "Please allow microphone access"
-          : conversation.status === "connected"
-            ? conversation.isSpeaking
-              ? "Snowball is speaking..."
-              : "Listening..."
-            : "Ready to start"}
-      </div>
-    </div>
+      <RepoSelector />
+    </>
   );
 }
