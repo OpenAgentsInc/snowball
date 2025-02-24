@@ -1,6 +1,6 @@
 "use client"
 import { cn } from "@/lib/utils"
-import { useCopyToClipboard } from "@/components/hooks/use-copy-to-clipboard"
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
 import { Button } from "@/components/ui/button"
 import { CheckIcon, CopyIcon } from "@radix-ui/react-icons"
 

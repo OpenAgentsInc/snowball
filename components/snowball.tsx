@@ -4,10 +4,18 @@ import { useEffect, useState } from "react"
 import { useRepoStore } from "@/stores/repo-store"
 import { useConversation } from "@11labs/react"
 import { MessageInput } from "./message-input"
+import { MessageList } from "@/components/ui/message-list"
+
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  createdAt?: Date
+}
 
 export function Snowball() {
   const [isReady, setIsReady] = useState(false);
-  const [messages, setMessages] = useState<{ source: string, message: string }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const getRepoState = useRepoStore.getState;
 
   const conversation = useConversation({
@@ -15,7 +23,12 @@ export function Snowball() {
     onDisconnect: () => console.log("Disconnected"),
     onMessage: (message: { source: string, message: string }) => {
       if (message.source === 'ai' || message.source === 'user') {
-        setMessages(prev => [...prev, message]);
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          role: message.source === 'ai' ? 'assistant' : 'user',
+          content: message.message,
+          createdAt: new Date()
+        }]);
       }
     },
     onError: (error: Error) => console.error("Error:", error),
@@ -62,18 +75,14 @@ export function Snowball() {
   return (
     <>
       <div className="flex flex-col items-center gap-4 mb-24">
-        <div className="w-full max-w-lg space-y-2">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`p-4 rounded-lg ${msg.source === 'ai'
-                ? 'bg-secondary'
-                : 'bg-primary text-primary-foreground'
-                }`}
-            >
-              {msg.message}
-            </div>
-          ))}
+        <div className="w-full max-w-lg">
+          <MessageList
+            messages={messages}
+            isTyping={conversation.isSpeaking}
+            messageOptions={(message) => ({
+              className: `${message.role === 'assistant' ? 'bg-secondary' : 'bg-primary text-primary-foreground'}`
+            })}
+          />
         </div>
       </div>
       <div className="fixed bottom-6 left-0 right-0 z-50">
