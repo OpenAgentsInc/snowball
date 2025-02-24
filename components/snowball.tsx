@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react"
-import { useRepoStore } from "@/stores/repo-store"
+import { useRepoStore, useCodePaneStore } from "@/stores/repo-store"
 import { useConversation } from "@11labs/react"
 import { MessageInput } from "./message-input"
 import { MessageList } from "@/components/ui/message-list"
 import { RepoSelector } from "./repo-selector"
 import { Card } from "@/components/ui/card"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 
 interface Message {
   id: string
@@ -19,7 +20,10 @@ export function Snowball() {
   const [isReady, setIsReady] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const getRepoState = useRepoStore.getState;
-  const isCodePaneVisible = useRepoStore((state) => state.isCodePaneVisible);
+  const isCodePaneVisible = useCodePaneStore((state) => state.isCodePaneVisible);
+  const codeContent = useCodePaneStore((state) => state.codeContent);
+  const setCodeContent = useCodePaneStore((state) => state.setCodeContent);
+  const toggleCodePane = useCodePaneStore((state) => state.toggleCodePane);
 
   const conversation = useConversation({
     onConnect: () => console.log("Connected"),
@@ -62,9 +66,11 @@ export function Snowball() {
           },
           show_code: async (data: { content?: string }) => {
             console.log("show_code", data)
-            const store = getRepoState();
-            store.toggleCodePane();
-            return `Code pane is now ${store.isCodePaneVisible ? 'visible' : 'hidden'}`;
+            if (data.content) {
+              setCodeContent(data.content);
+            }
+            toggleCodePane();
+            return `Code pane is now ${isCodePaneVisible ? 'hidden' : 'visible'}`;
           }
         },
       });
@@ -84,9 +90,9 @@ export function Snowball() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-8rem)] gap-6 px-6 pb-24">
+      <div className="flex h-[calc(100vh-8rem)] gap-6 px-6">
         <div className={`flex-1 flex flex-col ${isCodePaneVisible ? 'items-start' : 'items-center'}`}>
-          <div className={`${isCodePaneVisible ? 'w-[600px]' : 'w-full max-w-lg'} pb-20`}>
+          <div className={`${isCodePaneVisible ? 'w-[600px]' : 'w-full max-w-lg'} h-full overflow-y-auto pb-24`}>
             <MessageList
               messages={messages}
               isTyping={conversation.isSpeaking}
@@ -98,9 +104,11 @@ export function Snowball() {
         </div>
 
         {isCodePaneVisible && (
-          <Card className="w-[600px] p-6">
-            <div className="h-full">
-              Code pane content will go here
+          <Card className="w-[600px] h-full overflow-y-auto">
+            <div className="h-full prose prose-sm dark:prose-invert p-6">
+              <MarkdownRenderer>
+                {codeContent || ''}
+              </MarkdownRenderer>
             </div>
           </Card>
         )}

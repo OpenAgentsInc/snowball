@@ -5,32 +5,42 @@ interface RepoState {
   owner: string
   name: string
   branch: string
-  isCodePaneVisible: boolean
   setRepo: (owner: string, name: string, branch: string) => void
   clearRepo: () => void
-  toggleCodePane: () => void
 }
 
+interface CodePaneState {
+  isCodePaneVisible: boolean
+  codeContent: string | null
+  toggleCodePane: () => void
+  setCodeContent: (content: string | null) => void
+}
+
+const initialRepoState = {
+  owner: '',
+  name: '',
+  branch: 'main',
+}
+
+// Persisted store for repo info
 export const useRepoStore = create<RepoState>()(
   persist(
     (set) => ({
-      owner: '',
-      name: '',
-      branch: 'main',
-      isCodePaneVisible: false, // start with it hidden
+      ...initialRepoState,
       setRepo: (owner: string, name: string, branch: string) =>
         set({ owner, name, branch }),
-      clearRepo: () => set({ owner: '', name: '', branch: 'main' }),
-      toggleCodePane: () => set((state) => ({ isCodePaneVisible: !state.isCodePaneVisible })),
+      clearRepo: () => set(initialRepoState),
     }),
     {
-      name: 'repo-storage', // unique name for localStorage
-      partialize: (state) => ({
-        owner: state.owner,
-        name: state.name,
-        branch: state.branch,
-        isCodePaneVisible: state.isCodePaneVisible,
-      }), // only persist these fields
+      name: 'repo-storage',
     }
   )
 )
+
+// Non-persisted store for code pane
+export const useCodePaneStore = create<CodePaneState>((set) => ({
+  isCodePaneVisible: false,
+  codeContent: null,
+  toggleCodePane: () => set((state) => ({ isCodePaneVisible: !state.isCodePaneVisible })),
+  setCodeContent: (content: string | null) => set({ codeContent: content }),
+}))
