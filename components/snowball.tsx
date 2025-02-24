@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { useRepoStore } from "@/stores/repo-store"
 import { useConversation } from "@11labs/react"
 import { Button } from "./ui/button"
+import { MessageInput } from "./message-input"
 
 export function Snowball() {
   const [isReady, setIsReady] = useState(false);
@@ -61,52 +62,61 @@ export function Snowball() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-2">
-        {conversation.status === "disconnected" ? (
-          <Button
-            onClick={startConversation}
-            disabled={!isReady}
-            className="flex items-center gap-2"
-          >
-            <Mic className="w-4 h-4" />
-            Start Conversation
-          </Button>
-        ) : (
-          <Button
-            onClick={endConversation}
-            variant="destructive"
-            className="flex items-center gap-2"
-          >
-            <MicOff className="w-4 h-4" />
-            End Conversation
-          </Button>
-        )}
-      </div>
+    <>
+      <div className="flex flex-col items-center gap-4 mb-24">
+        <div className="flex gap-2">
+          {conversation.status === "disconnected" ? (
+            <Button
+              onClick={startConversation}
+              disabled={!isReady}
+              className="flex items-center gap-2"
+            >
+              <Mic className="w-4 h-4" />
+              Start Conversation
+            </Button>
+          ) : (
+            <Button
+              onClick={endConversation}
+              variant="destructive"
+              className="flex items-center gap-2"
+            >
+              <MicOff className="w-4 h-4" />
+              End Conversation
+            </Button>
+          )}
+        </div>
 
-      <div className="w-full max-w-lg space-y-2">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`p-4 rounded-lg ${msg.source === 'ai'
-              ? 'bg-secondary'
-              : 'bg-primary text-primary-foreground'
-              }`}
-          >
-            {msg.message}
+        <div className="w-full max-w-lg space-y-2">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`p-4 rounded-lg ${msg.source === 'ai'
+                ? 'bg-secondary'
+                : 'bg-primary text-primary-foreground'
+                }`}
+            >
+              {msg.message}
+            </div>
+          ))}
+        </div>
+
+        <div className="text-sm text-muted-foreground">
+          {!isReady
+            ? "Please allow microphone access"
+            : conversation.status === "connected"
+              ? conversation.isSpeaking
+                ? "Snowball is speaking..."
+                : "Listening..."
+              : "Ready to start"}
+        </div>
+      </div>
+      <div className="fixed bottom-6 left-0 right-0 z-50">
+        <div className="max-w-lg mx-auto px-4">
+          <div className="shadow-lg rounded-xl">
+            <MessageInput />
           </div>
-        ))}
+        </div>
       </div>
-
-      <div className="text-sm text-muted-foreground">
-        {!isReady
-          ? "Please allow microphone access"
-          : conversation.status === "connected"
-            ? conversation.isSpeaking
-              ? "Snowball is speaking..."
-              : "Listening..."
-            : "Ready to start"}
-      </div>
-    </div>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+"use client"
 import React from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowUp, Paperclip, Square, X } from "lucide-react"
@@ -9,7 +10,7 @@ export function MessageInput() {
     <div className="relative flex w-full">
       <textarea
         aria-label="Write your prompt here"
-        placeholder="Ask AI..."
+        placeholder="Ask Snowball..."
         className="z-10 w-full grow resize-none rounded-xl border border-input bg-background p-3 pr-24 text-sm ring-offset-background transition-[border] placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
       />
       <div className="absolute right-3 top-3 z-20 flex gap-2">

@@ -30,17 +30,17 @@ export function ClientLayout({
           <ArwesBackground />
           <SidebarProvider>
             <div className="flex min-h-screen w-full">
-              <div className="w-64 border-r border-white/20 backdrop-blur-sm">
+              {/* <div className="w-64 border-r border-white/20 backdrop-blur-sm">
                 <LeftSidebar />
-              </div>
+              </div> */}
               <main className="flex-1 flex">
                 <div className="w-full max-w-7xl mx-auto px-4 py-6">
                   {children}
                 </div>
               </main>
-              <div className="w-64 border-l border-white/20 backdrop-blur-sm">
+              {/* <div className="w-64 border-l border-white/20 backdrop-blur-sm">
                 <RightSidebar />
-              </div>
+              </div> */}
             </div>
             <div className="fixed bottom-4 right-4 z-50">
               <AuthButtons />
