@@ -64,13 +64,21 @@ export function Snowball() {
             const state = getRepoState();
             return "Active repo: " + state.owner + "/" + state.name + " " + state.branch;
           },
-          show_code: async (data: { content?: string }) => {
+          show_code: async (data: { filepath?: string }) => {
             console.log("show_code", data)
-            if (data.content) {
-              setCodeContent(data.content);
+            try {
+              if (!data.filepath) {
+                throw new Error('No filepath provided')
+              }
+
+              const content = await getRepoState().fetchFileContent(data.filepath)
+              setCodeContent(content)
+              toggleCodePane()
+              return `Showing file: ${data.filepath}`
+            } catch (error: any) {
+              console.error('Failed to fetch file:', error)
+              return `Failed to load file: ${error?.message || 'Unknown error'}`
             }
-            toggleCodePane();
-            return `Code pane is now ${isCodePaneVisible ? 'hidden' : 'visible'}`;
           }
         },
       });
@@ -90,7 +98,7 @@ export function Snowball() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-8rem)] gap-6 px-6">
+      <div className="flex mt-8 h-[calc(100vh-10.4rem)] gap-6 px-6">
         <div className={`flex-1 flex flex-col ${isCodePaneVisible ? 'items-start' : 'items-center'}`}>
           <div className={`${isCodePaneVisible ? 'w-[600px]' : 'w-full max-w-lg'} h-full overflow-y-auto pb-24`}>
             <MessageList
@@ -104,7 +112,7 @@ export function Snowball() {
         </div>
 
         {isCodePaneVisible && (
-          <Card className="w-[600px] h-full overflow-y-auto">
+          <Card className="w-[600px] h-[500px] overflow-y-auto">
             <div className="h-full prose prose-sm dark:prose-invert p-6">
               <MarkdownRenderer>
                 {codeContent || ''}

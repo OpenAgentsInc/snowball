@@ -37,3 +37,7 @@ Had an amazing conversation with Snowball where I guided it to think about its o
 ### 12:21am
 
 The [tool registry](https://github.com/OpenAgentsInc/snowball/issues/5) works for two tools, view_file and view_folder. Notably, this are defined not in ElevenLabs (which presumably has a limit of # of tools per agent) but in our own system, soon database, enabling us to smartly route between even thousands of tools. I had an excellent [conversation #2](docs/conversation02.md) with Snowball in which it traversed multiple files in the GitHub repo and wrote up its first [issue](https://github.com/OpenAgentsInc/snowball/issues/17), which will be the first tool it writes itself. Will continue after some sleep!
+
+### 11:59pm
+
+Phew, got behind on updates. Had to scale down the initial goal of adding crowdsourced tool UI, settling only for building our tool registry in an extensible way on our own server rather than adding a bunch of tools to the ElevenLabs UI. Happily we were able to ship a working demo of Snowball traversing its own codebaes using view_file and view_folder tools tied to the GitHub API (via server tools) while also interacting with the user UI via client tools get_active_repo and show_code which displays any given file contents in a pane next to the user chat. Nowhere near where we hoped to be at the end BUT very happy to validate our core idea and explore avenues for future expansion.
